@@ -1,3 +1,11 @@
+# Sendy v6.1.2 Docker Image
+- Modified to compile for ARM CPUs
+```
+docker buildx build --platform linux/arm64 -t sendy --target sendy -f ./Dockerfile .
+docker export -o sendy.tar sendy
+```
+
+
 # Quick reference
 This is the unofficial Sendy docker repository.
 
