@@ -12,19 +12,24 @@
 
 FROM php:8.0-apache as sendy
 
-ARG SENDY_VER=6.0.4
-ARG ARTIFACT_DIR=6.0.4
+ARG SENDY_VER=6.1.2
+ARG ARTIFACT_DIR=6.1.2
 
 ENV SENDY_VERSION ${SENDY_VER}
 
-RUN apt -qq update && apt -qq upgrade -y \
-  # Install unzip cron
-  && apt -qq install -y unzip cron  \
-  # Install php extension gettext
-  # Install php extension mysqli
+# Clean lists first, then update and install only what's needed
+RUN rm -rf /var/lib/apt/lists/* \
+  && apt -qq update \
+  # Install ONLY required packages, skip the full upgrade
+  && apt -qq install -y --no-install-recommends unzip cron \
+  # Install php extension build dependencies (handled by the script) and extensions
   && docker-php-ext-install calendar gettext mysqli \
-  # Remove unused packages
-  && apt autoremove -y 
+  # Clean up APT cache and lists to reduce image size
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/*
+  # Optional: You might run apt autoremove -y here if needed,
+  # but often not necessary after specific installs with --no-install-recommends.
+  # && apt autoremove -y --purge
 
 # Copy artifacts
 COPY ./artifacts/${ARTIFACT_DIR}/ /tmp
